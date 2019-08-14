@@ -11,20 +11,17 @@ def get_req_json(url):
 
     try:
         req = requests.get(url, timeout=30)
-    except ConnectionError:
+    except requests.exceptions.RequestException:
         msg = 'ERROR: Failed to make connection to %s' %(url)
         print(msg)
         sys.exit(1)
-    except Timeout:
-        msg = 'ERROR: Connection timeout on %s' %(url)
-        print(msg)
-        sys.exit(2)
-    except HTTPError:
-        msg = 'ERROR: Connection to %s returns %d' %(url, req.status_code)
-        print(msg)
-        sys.exit(4)
-    else:
+
+    try:
         json_dict = req.json()
+    except:
+        msg = 'ERROR: Failed to parse JSON output'
+        print(msg) 
+        sys.exit(2)
 
     return json_dict
 
@@ -45,7 +42,7 @@ def get_dn_dict(url):
         if len(dn_metrics_dict) == 0:
             msg = 'ERROR: Failed to find the metric Hadoop:service=NameNode,name=NameNodeInfo'
             print(msg)
-            sys.exit(8)
+            sys.exit(4)
 
         '''live datanode(s)'''
         live_dn_dict = json.loads(dn_metrics_dict['LiveNodes'])
@@ -95,4 +92,4 @@ def get_dn_dict(url):
     return dn_dict
 
 if __name__ == '__main__':
-    #print(get_dn_dict('http://nn1.internal:50070'))
+    print(get_dn_dict('http://nn1.internal'))
