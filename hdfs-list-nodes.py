@@ -91,5 +91,80 @@ def get_dn_dict(url):
 
     return dn_dict
 
+def get_dn_state_output(url, state):
+    dn_state_dict = get_dn_dict(url)
+    dn_state_list = []
+    current_time = int(time.time())
+
+    if len(dn_state_dict) == 0:
+        msg = 'WARNING: No available state data gathered'
+        print(msg)
+        sys.exit(8)
+
+    if state == 'live':
+        if len(dn_state_dict['live']) != 0:
+            for dn in dn_state_dict['live'].keys():
+                admin_state = dn_state_dict['live'][dn]['admin_state']
+                last_contact = dn_state_dict['live'][dn]['last_contact']
+
+                timestamp = time.asctime(time.gmtime(current_time - last_contact))
+
+                output = '%s\t%s\t%s\t%d' %(dn, admin_state, timestamp, last_contact)
+                dn_state_list.append(output)
+                print(output)
+    elif state == 'live-and-decom':
+        if len(dn_state_dict['live_and_decom']) != 0:
+            for dn in dn_state_dict['live_and_decom'].keys():
+                admin_state = dn_state_dict['live_and_decom'][dn]['admin_state']
+                last_contact = dn_state_dict['live_and_decom'][dn]['last_contact']
+
+                timestamp = time.asctime(time.gmtime(current_time - last_contact))
+
+                output = '%s\t%s\t%s\t%d' %(dn, admin_state, timestamp, last_contact)
+                dn_state_list.append(output)
+                print(output)
+    elif state == 'decom-ing':
+        if len(dn_state_dict['decom_ing']) != 0:
+            for dn in dn_state_dict['decom_ing'].keys():
+                admin_state = dn_state_dict['decom_ing'][dn]['admin_state']
+                last_contact = dn_state_dict['decom_ing'][dn]['last_contact']
+
+                output = '%s\t%s\t%s\t%s' %(dn, admin_state, 'na', last_contact)
+                dn_state_list.append(output)
+                print(output)
+    elif state == 'dead':
+        if len(dn_state_dict['dead']) != 0:
+            for dn in dn_state_dict['dead'].keys():
+                admin_state = dn_state_dict['dead'][dn]['admin_state']
+                last_contact = dn_state_dict['dead'][dn]['last_contact']
+
+                timestamp = time.asctime(time.gmtime(current_time - last_contact))
+
+                output = '%s\t%s\t%s\t%d' %(dn, admin_state, timestamp, last_contact)
+                dn_state_list.append(output)
+                print(output)
+    elif state == 'dead-and-decom':
+        if len(dn_state_dict['dead_and_decom']) != 0:
+            for dn in dn_state_dict['dead_and_decom'].keys():
+                admin_state = dn_state_dict['dead_and_decom'][dn]['admin_state']
+                last_contact = dn_state_dict['dead_and_decom'][dn]['last_contact']
+
+                timestamp = time.asctime(time.gmtime(int(time.time()) - last_contact))
+
+                output = '%s\t%s\t%s\t%d' %(dn, admin_state, timestamp, last_contact)
+                dn_state_list.append(output)
+                print(output)
+    else:
+        msg = 'ERROR: Unrecognized parameter'
+        print(msg)
+        sys.exit(16)
+
 if __name__ == '__main__':
-    print(get_dn_dict('http://nn1.internal'))
+    '''set up args'''
+    parser = argparse.ArgumentParser(description='HDFS DataNode State List', epilog='Display Format: DataNode<tab>State<tab>LastContactTimestamp<tab>LastContactSecond(s)')
+    parser.add_argument('-u', '--url', type=str, required=True, help='full namenode url. <http(s)://namenode-hostname:http-port>')
+    parser.add_argument('-s', '--state', type=str, required=True, help='datanode state. <live|live-and-decom|decom-ing|dead|dead-and-decom>')
+    args = parser.parse_args()
+
+    '''execution'''
+    get_dn_state_output(args.url, args.state)
