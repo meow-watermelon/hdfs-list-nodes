@@ -28,8 +28,13 @@ DataNode<tab>State<tab>LastContactTimestamp<tab>LastContactSecond(s)
 *-s*: specify datanode state to be displayed. available states flags are **live**, **live-and-decom**, **decom-ing**, **dead**, **dead-and-decom**. 
 
 **Notes**
+
 *live*: In service
+
 *live-and-decom*: Decommissioned and still live
+
 *decom-ing*: Under decommission process
+
 *dead*: Lost heartbeat and marked as dead node
+
 *dead-and-decom*: Decommissioned and marked as dead node
