@@ -28,23 +28,19 @@ def get_req_json(url):
 def get_dn_dict(url):
     dn_dict = dict(zip(['live', 'live_and_decom', 'decom_ing', 'dead', 'dead_and_decom'], [{}, {}, {}, {}, {}]))
     dn_metrics_dict = {}
-    jmx_req = url+'/jmx'
+    jmx_req = url+'/jmx?qry=Hadoop:service=NameNode,name=NameNodeInfo'
 
     jmx_resp_json = get_req_json(jmx_req)
 
     if jmx_resp_json != None:
-        jmx_resp_list = jmx_resp_json['beans']
-        for m in jmx_resp_list:
-            if m['name'] == 'Hadoop:service=NameNode,name=NameNodeInfo':
-                dn_metrics_dict = m
-                break
+        dn_metrics_dict = jmx_resp_json['beans'][0]
 
         if len(dn_metrics_dict) == 0:
             msg = 'ERROR: Failed to find the metric Hadoop:service=NameNode,name=NameNodeInfo'
             print(msg)
             sys.exit(4)
 
-        '''live datanode(s)'''
+        # live datanode(s)
         live_dn_dict = json.loads(dn_metrics_dict['LiveNodes'])
 
         if len(live_dn_dict) != 0:
@@ -62,7 +58,7 @@ def get_dn_dict(url):
                     dn_dict['live_and_decom'][dn]['admin_state'] = 'LiveAndDecommissioned'
                     dn_dict['live_and_decom'][dn]['last_contact'] = last_contact
 
-        '''decommissioning datanode(s)'''
+        # decommissioning datanode(s)
         decom_ing_dn_dict = json.loads(dn_metrics_dict['DecomNodes'])
 
         if len(decom_ing_dn_dict) != 0:
@@ -71,7 +67,7 @@ def get_dn_dict(url):
                 dn_dict['decom_ing'][dn]['admin_state'] = 'Decommissioning'
                 dn_dict['decom_ing'][dn]['last_contact'] = 'na'
 
-        '''dead datanode(s)'''
+        # dead datanode(s)
         dead_dn_dict = json.loads(dn_metrics_dict['DeadNodes'])
 
         if len(dead_dn_dict) != 0:
@@ -160,11 +156,11 @@ def get_dn_state_output(url, state):
         sys.exit(16)
 
 if __name__ == '__main__':
-    '''set up args'''
+    # set up args
     parser = argparse.ArgumentParser(description='HDFS DataNode State List', epilog='Display Format: DataNode<tab>State<tab>LastContactTimestamp<tab>LastContactSecond(s)')
     parser.add_argument('-u', '--url', type=str, required=True, help='full namenode url. <http(s)://namenode-hostname:http-port>')
     parser.add_argument('-s', '--state', type=str, required=True, help='datanode state. <live|live-and-decom|decom-ing|dead|dead-and-decom>')
     args = parser.parse_args()
 
-    '''execution'''
+    # execution
     get_dn_state_output(args.url, args.state)
